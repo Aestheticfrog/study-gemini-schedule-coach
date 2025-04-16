@@ -1,6 +1,5 @@
-
-import { useState, useEffect, useRef } from "react";
-import { Check, X, Upload } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,27 +17,15 @@ export default function CourseSelector({ courses, onAddCourse, onClearCourses }:
   const [courseName, setCourseName] = useState("");
   const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
   const [suggestions, setSuggestions] = useState<Course[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const courses = await loadSyllabusFromExcel(file);
-      setAvailableCourses(courses);
-      toast({
-        title: "Success",
-        description: `Loaded ${courses.length} courses from syllabus file`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load syllabus file",
-        variant: "destructive"
-      });
-    }
-  };
+  useEffect(() => {
+    const defaultCourses = loadSyllabusFromExcel();
+    setAvailableCourses(defaultCourses);
+    toast({
+      title: "Courses Loaded",
+      description: `${defaultCourses.length} default courses are available`,
+    });
+  }, []);
 
   const handleCourseNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -69,24 +56,6 @@ export default function CourseSelector({ courses, onAddCourse, onClearCourses }:
 
   return (
     <div className="space-y-4">
-      <div>
-        <input
-          type="file"
-          accept=".xlsx,.xls"
-          className="hidden"
-          ref={fileInputRef}
-          onChange={handleFileUpload}
-        />
-        <Button 
-          onClick={() => fileInputRef.current?.click()}
-          variant="outline"
-          className="w-full"
-        >
-          <Upload className="mr-2 h-4 w-4" />
-          Upload Syllabus Excel File
-        </Button>
-      </div>
-
       <div className="grid gap-4">
         <div className="relative">
           <label className="text-sm font-medium leading-none mb-2 block">Course Name</label>

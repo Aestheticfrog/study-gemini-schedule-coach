@@ -1,32 +1,8 @@
-
-import * as XLSX from 'xlsx';
 import { Course } from '@/lib/types';
+import { defaultCourses } from '@/data/defaultCourses';
 
-export function loadSyllabusFromExcel(file: File): Promise<Course[]> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
-      try {
-        const data = e.target?.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-        
-        const courses: Course[] = jsonData.map((row: any) => ({
-          name: String(row.Course || '').trim().toLowerCase(),
-          syllabus: String(row.Syllabus || '').trim()
-        })).filter(course => course.name && course.syllabus);
-        
-        resolve(courses);
-      } catch (error) {
-        reject(new Error('Error parsing Excel file'));
-      }
-    };
-    
-    reader.onerror = () => reject(new Error('Error reading file'));
-    reader.readAsBinaryString(file);
-  });
+export function loadSyllabusFromExcel(): Course[] {
+  return defaultCourses;
 }
 
 export function findSimilarCourses(input: string, courses: Course[]): Course[] {
