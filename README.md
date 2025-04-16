@@ -1,5 +1,9 @@
 # Welcome to your Lovable project
 
+## To view the final result open 
+
+https://study-gemini-schedule-coach.lovable.app/
+
 ## Project info
 
 **URL**: https://lovable.dev/projects/be82e1e5-12b2-4ae5-a06b-b510f9b8048f
