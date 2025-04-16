@@ -19,7 +19,12 @@ export const defaultCourses: Course[] = [
     syllabus: "Development of writing skills with focus on academic essays, research papers, and critical analysis of literature."
   },
   {
-    name: "history 101",
+    name: "history 101", 
     syllabus: "Survey of world history from ancient civilizations to modern times, examining key events, movements, and cultural developments."
+  },
+  // You can add more courses here or remove existing ones
+  {
+    name: "psychology 101",
+    syllabus: "Introduction to fundamental psychological principles, including cognitive processes, human development, and social psychology."
   }
 ];
