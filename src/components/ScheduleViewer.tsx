@@ -4,7 +4,7 @@ import { ArrowLeft, CalendarClock, Edit } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Schedule } from "@/lib/types";
-import { getSchedules } from "@/lib/storage";
+import { getSchedules, getSchedule } from "@/lib/storage";
 import ChatInterface from "./ChatInterface";
 
 interface ScheduleViewerProps {
@@ -18,7 +18,9 @@ export default function ScheduleViewer({ currentScheduleId, onBack, onEditComple
   const [currentSchedule, setCurrentSchedule] = useState<Schedule | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [editContent, setEditContent] = useState("");
+  const [activeTab, setActiveTab] = useState("schedule");
 
+  // Fetch the current schedule whenever the ID changes OR when edits are made
   useEffect(() => {
     const allSchedules = getSchedules();
     setSchedules(allSchedules);
@@ -49,6 +51,18 @@ export default function ScheduleViewer({ currentScheduleId, onBack, onEditComple
     }
   };
 
+  // Handle schedule updates from chat
+  const handleScheduleUpdatedFromChat = (scheduleId: string, newContent: string) => {
+    onEditComplete(scheduleId, newContent);
+    
+    // Always fetch the latest version after an update
+    const updatedSchedule = getSchedule(scheduleId);
+    if (updatedSchedule) {
+      setCurrentSchedule(updatedSchedule);
+      setEditContent(updatedSchedule.content);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(undefined, { 
       year: 'numeric', 
@@ -74,7 +88,7 @@ export default function ScheduleViewer({ currentScheduleId, onBack, onEditComple
   }
 
   return (
-    <Tabs defaultValue="schedule" className="w-full">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <div className="flex justify-between items-center mb-4">
         <button 
           onClick={onBack}
@@ -136,7 +150,7 @@ export default function ScheduleViewer({ currentScheduleId, onBack, onEditComple
       <TabsContent value="chat">
         <ChatInterface 
           currentSchedule={currentSchedule}
-          onScheduleUpdated={onEditComplete}
+          onScheduleUpdated={handleScheduleUpdatedFromChat}
         />
       </TabsContent>
     </Tabs>
