@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Calendar, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -84,13 +85,19 @@ Each time represents when a study session can start. Please create sessions star
 Study only on these days: ${selectedDays.join(', ')}.
 Each study session should last no longer than ${maxStudyTime} hours.
 
-IMPORTANT: You must NEVER create overlapping study sessions. For consecutive start times, ALWAYS ensure 
-the earlier session ends EXACTLY at the start time of the next session, regardless of maximum duration.
+IMPORTANT: To prevent ANY overlapping study sessions, please follow this rule:
+For ANY set of consecutive study times (sorted chronologically), EACH session MUST end exactly when the next session begins.
+This rule applies no matter how far apart the start times are or what the maximum duration is.
+
 For example:
-- If sessions start at 15:00, 15:30, and 16:00, with maximum duration 1.5 hours:
-  - 15:00 session MUST end at 15:30 (not 16:30)
-  - 15:30 session MUST end at 16:00 (not 17:00)
-  - 16:00 session can last up to the maximum duration (up to 17:30)
+- If sessions start at 9:00, 10:00, and 13:00 with maximum duration of 1.5 hours:
+  - 9:00 session MUST end at 10:00 (when the next session starts)
+  - 10:00 session MUST end at 13:00 (when the next session starts) 
+  - 13:00 session can last up to the maximum duration (${maxStudyTime} hours)
+- If sessions start at 15:00, 15:30, and 16:00:
+  - 15:00 session MUST end at 15:30 (when the next session starts)
+  - 15:30 session MUST end at 16:00 (when the next session starts)
+  - 16:00 session can last up to the maximum duration (${maxStudyTime} hours)
 
 Distribute the topics evenly and cover all the syllabus items.
 Provide the schedule in a clear format with specific dates and times starting from ${startDate.toISOString().split('T')[0]}.
