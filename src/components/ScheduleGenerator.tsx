@@ -84,6 +84,12 @@ I've provided starting times for study sessions: ${times.join(', ')}.
 Each time represents when a study session can start. Please create sessions starting at these times.
 Study only on these days: ${selectedDays.join(', ')}.
 Each study session should last no longer than ${maxStudyTime} hours.
+
+IMPORTANT: Do NOT create overlapping study sessions. If two sessions would overlap based on their duration, 
+adjust the duration of the earlier session to end before the next session begins.
+For example, if there are sessions at 09:00 and 10:00, and the maximum duration is 1.5 hours, 
+the 09:00 session should end at 10:00 (not 10:30) to avoid overlap with the 10:00 session.
+
 Distribute the topics evenly and cover all the syllabus items.
 Provide the schedule in a clear format with specific dates and times starting from ${startDate.toISOString().split('T')[0]}.
 Include the duration for each study session, ensuring no session exceeds ${maxStudyTime} hours.
