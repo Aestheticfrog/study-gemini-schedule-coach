@@ -38,6 +38,38 @@ export default function ScheduleGenerator({ courses, onScheduleGenerated }: Sche
     );
   };
 
+  const parseTimeSlots = (timeInput: string): { start: string, end: string }[] => {
+    const times = timeInput.split(',').map(t => t.trim());
+    const timeSlots: { start: string, end: string }[] = [];
+    
+    // Process the time inputs to create explicit time slots
+    for (let i = 0; i < times.length - 1; i++) {
+      // Check if these times could form a reasonable slot
+      const startParts = times[i].split(':').map(Number);
+      const endParts = times[i+1].split(':').map(Number);
+      
+      if (startParts.length === 2 && endParts.length === 2) {
+        const startHour = startParts[0];
+        const startMin = startParts[1];
+        const endHour = endParts[0];
+        const endMin = endParts[1];
+        
+        // Calculate duration in hours
+        const duration = (endHour - startHour) + (endMin - startMin) / 60;
+        
+        // Only add if this is a valid time slot (positive duration)
+        if (duration > 0) {
+          timeSlots.push({
+            start: times[i],
+            end: times[i+1]
+          });
+        }
+      }
+    }
+    
+    return timeSlots;
+  };
+
   const generateSchedule = async () => {
     // Validate inputs
     const selectedDays = studyDays.filter(day => day.selected).map(day => day.day);
@@ -76,11 +108,27 @@ export default function ScheduleGenerator({ courses, onScheduleGenerated }: Sche
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + 28); // 4 weeks schedule
       
-      const prompt = `Create a detailed, multi-week study schedule with each study session being a maximum of ${maxStudyTime} hour(s). 
-Based on the given days: ${selectedDays.join(', ')} and preferred study times: ${studyTimes}. 
-Distribute the topics evenly and cover all the syllabus items. Provide the schedule in a clear format with specific dates and times starting from ${startDate.toISOString().split('T')[0]}. 
-Include the duration each topic needs to be studied. If a topic needs more than ${maxStudyTime} hours, split it into multiple parts.
-Only include the days and times mentioned, it is not necessary that the schedule must contain all days and time slots. Do not make any suggestions. Give direct Answer.
+      // Parse time slots to better understand available study times
+      const timeSlots = parseTimeSlots(studyTimes);
+      let timeConstraintsText = "";
+      
+      if (timeSlots.length > 0) {
+        timeConstraintsText = `I've provided time slots: ${timeSlots.map(slot => 
+          `${slot.start}-${slot.end}`).join(', ')}. Each time slot defines the start and end time of an available study period. `;
+        timeConstraintsText += `Please ensure no study session exceeds the duration of its time slot or ${maxStudyTime} hours, whichever is shorter. `;
+      } else {
+        // Fallback to treating times as individual start times
+        timeConstraintsText = `Based on the study times provided (${studyTimes}), please create study sessions that start at these times and don't exceed ${maxStudyTime} hours per session. `;
+      }
+      
+      const prompt = `Create a detailed, multi-week study schedule for the next 4 weeks.
+${timeConstraintsText}
+Study only on these days: ${selectedDays.join(', ')}.
+Distribute the topics evenly and cover all the syllabus items.
+Provide the schedule in a clear format with specific dates and times starting from ${startDate.toISOString().split('T')[0]}.
+Include the duration for each study session, ensuring no session exceeds ${maxStudyTime} hours.
+If a topic needs more time than available in one session, split it into multiple parts.
+Only schedule studies for the specified days and times - do not add extra slots.
 Syllabus: ${courses.map(c => `${c.name}: ${c.syllabus}`).join(', ')}`;
 
       const responseText = await callGeminiAPI(prompt);
@@ -135,12 +183,12 @@ Syllabus: ${courses.map(c => `${c.name}: ${c.syllabus}`).join(', ')}`;
           </h3>
           <div className="space-y-2">
             <Input
-              placeholder="Enter times (comma separated, e.g. 09:00, 14:00, 19:00)"
+              placeholder="Enter times (comma separated, e.g. 09:00, 10:00, 14:00, 16:00)"
               value={studyTimes}
               onChange={(e) => setStudyTimes(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              Enter preferred study times in 24-hour format (HH:MM), separated by commas
+              Enter study time slots in 24-hour format (HH:MM). For example: 09:00, 10:00, 14:00, 16:00 creates two time slots: 09:00-10:00 and 14:00-16:00
             </p>
           </div>
         </div>
