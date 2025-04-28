@@ -24,6 +24,7 @@ export function AuthButton() {
         setCurrentUser(userData);
       } catch (error) {
         console.error("Error checking user:", error);
+        // Silent fail - we just won't have a user
       }
     };
     

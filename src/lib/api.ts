@@ -7,15 +7,27 @@ import { createClient } from '@supabase/supabase-js';
 // In a production app, you should use environment variables
 const API_KEY = "AIzaSyDbsVsml9AwYFyKAr4ntzjDALGgZiBFbSQ";
 
-// Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Initialize Supabase client with fallback values for development
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-supabase-url.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvdXItcHJvamVjdC1yZWYiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoxNjAwMDAwMDAwfQ.placeholder-key-please-update';
+
+// Create Supabase client
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // User authentication methods
 export const user = {
   signInWithGoogle: async () => {
     try {
+      // Check if we have valid Supabase credentials before attempting sign-in
+      if (supabaseUrl === 'https://your-supabase-url.supabase.co') {
+        toast({
+          title: "Supabase Configuration Required",
+          description: "Please set up your Supabase URL and keys in the project settings.",
+          variant: "destructive",
+        });
+        throw new Error("Supabase not configured");
+      }
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -42,9 +54,14 @@ export const user = {
   },
   
   current: () => {
-    return supabase.auth.getUser().then(({ data }) => {
-      return data.user;
-    });
+    try {
+      return supabase.auth.getUser().then(({ data }) => {
+        return data.user;
+      });
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
   }
 };
 
