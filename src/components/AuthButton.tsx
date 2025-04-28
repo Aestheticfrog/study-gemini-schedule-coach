@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { user } from "@/lib/api";
 import { LogIn, UserRound } from "lucide-react";
@@ -8,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState, useEffect } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export function AuthButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -97,3 +98,4 @@ export function AuthButton() {
     </Button>
   );
 }
+
