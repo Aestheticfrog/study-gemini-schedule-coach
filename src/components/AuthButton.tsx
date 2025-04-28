@@ -8,17 +8,33 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 export function AuthButton() {
   const [isLoading, setIsLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const { toast } = useToast();
+
+  // Check for current user on component mount
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const userData = await user.current();
+        setCurrentUser(userData);
+      } catch (error) {
+        console.error("Error checking user:", error);
+      }
+    };
+    
+    checkUser();
+  }, []);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
       await user.signInWithGoogle();
+      // The page will reload after OAuth redirect
     } catch (error) {
       toast({
         variant: "destructive",
@@ -31,13 +47,22 @@ export function AuthButton() {
   };
 
   const handleSignOut = async () => {
-    await user.signOut();
-    toast({
-      title: "Signed out successfully",
-    });
+    try {
+      await user.signOut();
+      setCurrentUser(null);
+      toast({
+        title: "Signed out successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Sign out failed",
+        description: "Could not sign out. Please try again.",
+      });
+    }
   };
 
-  if (user.current()) {
+  if (currentUser) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
