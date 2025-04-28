@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { user } from "@/lib/api";
 import { LogIn, UserRound } from "lucide-react";
@@ -16,7 +15,6 @@ export function AuthButton() {
   const [currentUser, setCurrentUser] = useState(null);
   const { toast } = useToast();
 
-  // Check for current user on component mount
   useEffect(() => {
     const checkUser = async () => {
       try {
@@ -24,10 +22,9 @@ export function AuthButton() {
         setCurrentUser(userData);
       } catch (error) {
         console.error("Error checking user:", error);
-        // Silent fail - we just won't have a user
       }
     };
-    
+
     checkUser();
   }, []);
 
@@ -35,7 +32,6 @@ export function AuthButton() {
     setIsLoading(true);
     try {
       await user.signInWithGoogle();
-      // The page will reload after OAuth redirect
     } catch (error) {
       toast({
         variant: "destructive",
@@ -48,6 +44,7 @@ export function AuthButton() {
   };
 
   const handleSignOut = async () => {
+    setIsLoading(true);
     try {
       await user.signOut();
       setCurrentUser(null);
@@ -60,6 +57,8 @@ export function AuthButton() {
         title: "Sign out failed",
         description: "Could not sign out. Please try again.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -67,13 +66,13 @@ export function AuthButton() {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" disabled={isLoading}>
             <UserRound className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleSignOut}>
-            Sign out
+            {isLoading ? "Signing out..." : "Sign out"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -87,8 +86,14 @@ export function AuthButton() {
       onClick={handleGoogleSignIn}
       disabled={isLoading}
     >
-      <LogIn className="mr-2 h-4 w-4" />
-      Sign in
+      {isLoading ? (
+        <span>Loading...</span>
+      ) : (
+        <>
+          <LogIn className="mr-2 h-4 w-4" />
+          Sign in
+        </>
+      )}
     </Button>
   );
 }
