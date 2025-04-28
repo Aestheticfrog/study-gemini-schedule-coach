@@ -1,12 +1,18 @@
 
 import { useState } from "react";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Course, StudyDay } from "@/lib/types";
 import { callGeminiAPI } from "@/lib/api";
 import { saveSchedule } from "@/lib/storage";
@@ -130,46 +136,89 @@ Syllabus: ${courses.map(c => `${c.name}: ${c.syllabus}`).join(', ')}`;
   };
 
   return (
-    <Card className="p-4">
-      <h2 className="text-xl font-bold mb-4">Generate Study Schedule</h2>
+    <Card className="p-4 transition-all duration-300 hover:shadow-lg">
+      <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+        Generate Study Schedule
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Select your study days, preferred times, and maximum session length</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </h2>
       
-      <div className="space-y-4">
-        <div>
+      <div className="space-y-6">
+        <div className="space-y-3">
           <h3 className="font-medium mb-2 flex items-center">
             <Calendar className="mr-2 h-4 w-4" /> Study Days
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {studyDays.map((day, index) => (
               <div key={index} className="flex items-center space-x-2">
                 <Checkbox 
                   id={`day-${index}`}
                   checked={day.selected}
                   onCheckedChange={() => toggleDay(index)}
+                  className="transition-all duration-200 data-[state=checked]:animate-scale-in"
                 />
-                <Label htmlFor={`day-${index}`}>{day.day}</Label>
+                <Label 
+                  htmlFor={`day-${index}`}
+                  className="cursor-pointer select-none transition-colors hover:text-primary"
+                >
+                  {day.day}
+                </Label>
               </div>
             ))}
           </div>
         </div>
         
-        <div>
+        <div className="space-y-3">
           <h3 className="font-medium mb-2 flex items-center">
             <Clock className="mr-2 h-4 w-4" /> Study Times
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="ml-2 h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Enter times in 24-hour format (e.g., 09:00, 14:00)</p>
+                  <p>Sessions will not overlap - each session ends when the next begins</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </h3>
           <div className="space-y-2">
             <Input
               placeholder="Enter start times (e.g. 09:00, 14:00, 19:00)"
               value={studyTimes}
               onChange={(e) => setStudyTimes(e.target.value)}
+              className="transition-all duration-200 focus:scale-[1.02]"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground animate-fade-in">
               Enter study start times in 24-hour format (HH:MM) separated by commas. Each time represents when a study session can begin.
             </p>
           </div>
         </div>
         
-        <div>
-          <h3 className="font-medium mb-2">Maximum Study Session Length</h3>
+        <div className="space-y-3">
+          <h3 className="font-medium mb-2 flex items-center">
+            Maximum Study Session Length
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="ml-2 h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Maximum duration for any study session</p>
+                  <p>Note: Sessions may be shorter to prevent overlaps</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </h3>
           <div className="flex items-center space-x-4">
             <Input
               type="number"
@@ -178,7 +227,7 @@ Syllabus: ${courses.map(c => `${c.name}: ${c.syllabus}`).join(', ')}`;
               step={0.5}
               value={maxStudyTime}
               onChange={(e) => setMaxStudyTime(parseFloat(e.target.value))}
-              className="w-24"
+              className="w-24 transition-all duration-200 focus:scale-[1.02]"
             />
             <span>hours</span>
           </div>
@@ -187,9 +236,19 @@ Syllabus: ${courses.map(c => `${c.name}: ${c.syllabus}`).join(', ')}`;
         <Button 
           onClick={generateSchedule} 
           disabled={isGenerating || courses.length === 0}
-          className="w-full"
+          className="w-full transition-all duration-300 hover:scale-[1.02]"
         >
-          {isGenerating ? "Generating..." : "Generate Schedule"}
+          {isGenerating ? (
+            <>
+              <Clock className="mr-2 h-4 w-4 animate-spin" />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Calendar className="mr-2 h-4 w-4" />
+              Generate Schedule
+            </>
+          )}
         </Button>
       </div>
     </Card>
