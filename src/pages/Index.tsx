@@ -9,6 +9,7 @@ import ScheduleViewer from "@/components/ScheduleViewer";
 import ScheduleHistory from "@/components/ScheduleHistory";
 import { Course } from "@/lib/types";
 import { saveCourse, getCourses, clearCourses, initializeStorage, updateSchedule } from "@/lib/storage";
+import { AuthButton } from "@/components/AuthButton";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("setup");
@@ -52,11 +53,14 @@ const Index = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <header className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">Study Schedule Coach</h1>
-        <p className="text-muted-foreground">
-          Create personalized study schedules with AI assistance
-        </p>
+      <header className="flex justify-between items-center mb-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-2">Study Schedule Coach</h1>
+          <p className="text-muted-foreground">
+            Create personalized study schedules with AI assistance
+          </p>
+        </div>
+        <AuthButton />
       </header>
       
       {activeTab === "viewSchedule" ? (
